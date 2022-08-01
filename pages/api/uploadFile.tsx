@@ -8,9 +8,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 	const { title, selectedFile } = req.body;
 
-    console.log(selectedFile)
+	
+	console.log(selectedFile)
+
 
 	try {
+
+		// const parsed = JSON.parse(selectedFile);
+		// const blob = await fetch(parsed.blob).then(res => res.blob());
+		// console.log(blob);
+
 		const uploadPhoto = await addDoc(collection(db, 'photos'), {
 			title,
 			createdAt: serverTimestamp(),
@@ -24,10 +31,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 			});
 		});
 
-        res.status(200).json({message: uploadPhoto.id})
+		res.status(200).json({ message: uploadPhoto.id });
 	} catch (error: any) {
-        res.status(422).json({message: error.message})
-    }
+		console.log(error)
+		res.status(422).json({ message: error.message });
+	}
 };
 
 export default handler;

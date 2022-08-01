@@ -7,12 +7,12 @@ import { getStorage } from 'firebase/storage';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-	apiKey: process.env.apiKey,
-	authDomain: process.env.authDomain,
-	projectId: process.env.projectId,
-	storageBucket: process.env.storageBucket,
-	messagingSenderId: process.env.messagingSenderId,
-	appId: process.env.appId,
+	apiKey: "AIzaSyC-KZTEa6o_Al07cPjkvlsoojlEAyWJBSo",
+	authDomain: "drag-drop-image.firebaseapp.com",
+	projectId: "drag-drop-image",
+	storageBucket: "drag-drop-image.appspot.com",
+	messagingSenderId: "49992694282",
+	appId: "1:49992694282:web:ab73142388116f175b3df3"
 };
 
 // Initialize Firebase
