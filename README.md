@@ -1,15 +1,15 @@
-## SHARE PHOTO
+# SHARE PHOTO
 
-# Share photo with everyone!
+## Share photo with everyone!
 
-# Technology
+### Technology
 
 - Next.js
 - React-dropzone
 - Firebase (firestore, storage)
 - Typescript
 
-# Functionalities
+### Functionalities
 
 - Drag and drop photo to upload ✅
 - Store photo data in database ✅
