@@ -9,6 +9,7 @@ import { FileWithPath } from 'react-dropzone';
 const DropArea = () => {
 	const [selectedFile, setSelectedFile] = useState<FileWithPath>();
 	const titleRef = useRef<HTMLInputElement>(null);
+	const [isUploading, setIsUploading] = useState<boolean>(false)
 
 	const onDrop = useCallback((acceptedFile: File[]) => {
 		setSelectedFile(acceptedFile[0]);
@@ -22,11 +23,13 @@ const DropArea = () => {
 
 	const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
+		console.log('es')
 		if (!selectedFile) return
 
 		const title = titleRef!.current!.value;
 
 		try {
+			setIsUploading(true)
 			const uploadPhoto = await addDoc(collection(db, 'photos'), {
 				title,
 				createdAt: serverTimestamp(),
@@ -44,8 +47,10 @@ const DropArea = () => {
 			console.log(uploadPhoto.id)
 
 			setSelectedFile(undefined)
+			setIsUploading(false)
 		} catch (error) {
 			console.log(error);
+			setIsUploading(false)
 		}
 	};
 
@@ -75,7 +80,7 @@ const DropArea = () => {
 						{selectedFile ? <img className='w-[120px] mt-3 border-solid border-[2px] border-slate-500 p-3 rounded-lg' src={URL.createObjectURL(selectedFile)} alt='' /> : <CloudUploadIcon sx={{ fontSize: 90 }} className='mt-3' />}
 					</div>
 				</div>
-				<button className='mt-5 bg-gray-800 w-full h-[75px] font-semibold rounded-sm hover:bg-gray-700'>
+				<button disabled={isUploading} className={`mt-5 bg-gray-800 w-full h-[75px] font-semibold rounded-sm hover:bg-gray-700 ${isUploading && 'bg-gray-600 text-gray-400'}`}>
 					Upload
 				</button>
 			</form>
