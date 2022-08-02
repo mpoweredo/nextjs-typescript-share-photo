@@ -24,6 +24,10 @@ const PhotoPage: NextPage<Props> = ({ photoData }) => {
 export default PhotoPage;
 
 export const getServerSideProps: GetServerSideProps = async context => {
+
+	// TODO: BETTER ERROR HANDLING
+
+
 	const photoId = context.query.photoId as string
     
 	const docRef = doc(db, 'photos', photoId);
@@ -36,6 +40,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
         image: fetchedData!.image,
         createdAt: fetchedData!.createdAt.toDate()
     }
+    
 
 	return {
 		props: {

@@ -5,31 +5,36 @@ import { db, storage } from '../data/firebaseConfig';
 import { addDoc, collection, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { FileWithPath } from 'react-dropzone';
+import Link from 'next/link';
 
 const DropArea = () => {
 	const [selectedFile, setSelectedFile] = useState<FileWithPath>();
 	const titleRef = useRef<HTMLInputElement>(null);
-	const [isUploading, setIsUploading] = useState<boolean>(false)
+	const [isUploading, setIsUploading] = useState<boolean>(false);
+	const [photoId, setPhotoID] = useState<string>(null);
 
 	const onDrop = useCallback((acceptedFile: File[]) => {
 		setSelectedFile(acceptedFile[0]);
 	}, []);
-	const { getRootProps, getInputProps, isDragActive, fileRejections } = useDropzone({ onDrop, multiple: false, accept: {
-		'image/png': [],
-		'image/jpg': [],
-		'image/jpeg': [],
-		'image/webp': []
-	}  });
+	const { getRootProps, getInputProps, isDragActive, fileRejections } = useDropzone({
+		onDrop,
+		multiple: false,
+		accept: {
+			'image/png': [],
+			'image/jpg': [],
+			'image/jpeg': [],
+			'image/webp': [],
+		},
+	});
 
 	const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		console.log('es')
-		if (!selectedFile) return
+		if (!selectedFile) return;
 
 		const title = titleRef!.current!.value;
 
 		try {
-			setIsUploading(true)
+			setIsUploading(true);
 			const uploadPhoto = await addDoc(collection(db, 'photos'), {
 				title,
 				createdAt: serverTimestamp(),
@@ -44,13 +49,11 @@ const DropArea = () => {
 				});
 			});
 
-			console.log(uploadPhoto.id)
-
-			setSelectedFile(undefined)
-			setIsUploading(false)
+			setPhotoID(uploadPhoto.id);
+			setSelectedFile(undefined);
+			setIsUploading(false);
 		} catch (error) {
-			console.log(error);
-			setIsUploading(false)
+			setIsUploading(false);
 		}
 	};
 
@@ -66,21 +69,46 @@ const DropArea = () => {
 				<div className='w-full h-full bg-gray-800 rounded-md p-5'>
 					<div
 						{...getRootProps()}
-						className={`bg-gray-700 text-white rounded-md w-full h-full ${!!fileRejections.length && 'border-solid border-[2px] border-red-400'} ${isDragActive && 'border-solid border-slate-200 border-[1px] bg-gray-600'} p-3 text-center flex items-center justify-center flex-col gap-1 text-xl font-bold cursor-pointer`}>
+						className={`bg-gray-700 text-white rounded-md w-full h-full ${
+							!!fileRejections.length && 'border-solid border-[2px] border-red-400'
+						} ${
+							isDragActive && 'border-solid border-slate-200 border-[1px] bg-gray-600'
+						} p-3 text-center flex items-center justify-center flex-col gap-1 text-xl font-bold cursor-pointer`}>
 						<input {...getInputProps()} />
 						{isDragActive ? (
 							<p>Drop the file here...</p>
 						) : (
 							<p>Drop image here, or click to select</p>
 						)}
-						<p className='text-gray-400 font-medium text-base'>
-							Supported files (jpeg, png, jpg)
-						</p>
-						{!!fileRejections.length && <p className='text-red-400 text-lg'>File type not supported!</p>}
-						{selectedFile ? <img className='w-[120px] mt-3 border-solid border-[2px] border-slate-500 p-3 rounded-lg' src={URL.createObjectURL(selectedFile)} alt='' /> : <CloudUploadIcon sx={{ fontSize: 90 }} className='mt-3' />}
+						<p className='text-gray-400 font-medium text-base'>Supported files (jpeg, png, jpg)</p>
+						{!!fileRejections.length && (
+							<p className='text-red-400 text-lg'>File type not supported!</p>
+						)}
+						{selectedFile ? (
+							<img
+								className='w-[120px] mt-3 border-solid border-[2px] border-slate-500 p-3 rounded-lg'
+								src={URL.createObjectURL(selectedFile)}
+								alt=''
+							/>
+						) : (
+							<CloudUploadIcon sx={{ fontSize: 90 }} className='mt-3' />
+						)}
+						{
+							// TODO: BETTER UI/UX
+							// TODO: ERROR HANDLING
+						}
 					</div>
 				</div>
-				<button disabled={isUploading} className={`mt-5 bg-gray-800 w-full h-[75px] font-semibold rounded-sm hover:bg-gray-700 ${isUploading && 'bg-gray-600 text-gray-400'}`}>
+						{photoId && (
+							<button>
+								<Link href={`/${photoId}`}>Your link</Link>
+							</button>
+						)}
+				<button
+					disabled={isUploading}
+					className={`mt-5 bg-gray-800 w-full h-[75px] font-semibold rounded-sm hover:bg-gray-700 ${
+						isUploading && 'bg-gray-600 text-gray-400'
+					}`}>
 					Upload
 				</button>
 			</form>
