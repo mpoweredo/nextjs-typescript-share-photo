@@ -10,41 +10,47 @@ type Props = {
 };
 
 const PhotoPage: NextPage<Props> = ({ photoData }) => {
+	const convertedDate = formatDate(photoData.createdAt);
 
-
-    const convertedDate = formatDate(photoData.createdAt)
-
-	return <div>
-        <h1>{photoData.title}</h1>
-        <img src={photoData.image} alt="" />
-        <h1>{convertedDate}</h1>
-    </div>;
+	return (
+		<div>
+			<h1>{photoData.title}</h1>
+			<img src={photoData.image} alt='' />
+			<h1>{convertedDate}</h1>
+		</div>
+	);
 };
 
 export default PhotoPage;
 
 export const getServerSideProps: GetServerSideProps = async context => {
-
 	// TODO: BETTER ERROR HANDLING
 
+	const photoId = context.query.photoId as string;
 
-	const photoId = context.query.photoId as string
-    
 	const docRef = doc(db, 'photos', photoId);
 	const docSnap = await getDoc(docRef);
 
-    const fetchedData = docSnap.data()
+	const fetchedData = docSnap.data();
 
-    const photoData: PhotoData = {
-        title: fetchedData!.title,
-        image: fetchedData!.image,
-        createdAt: fetchedData!.createdAt.toDate()
-    }
-    
+	if (!fetchedData) {
+		return {
+			redirect: {
+				destination: '/',
+				permanent: false,
+			},
+		};
+	}
+
+	const photoData: PhotoData = {
+		title: fetchedData!.title,
+		image: fetchedData!.image,
+		createdAt: fetchedData!.createdAt.toDate(),
+	};
 
 	return {
 		props: {
-			photoData: JSON.parse(JSON.stringify(photoData))
+			photoData: JSON.parse(JSON.stringify(photoData)),
 		},
 	};
 };
