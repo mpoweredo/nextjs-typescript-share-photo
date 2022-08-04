@@ -4,6 +4,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../data/firebaseConfig';
 import { PhotoData } from '../../types/types';
 import { formatDate } from '../../helpers/convertDate';
+import PhotoItem from '../../components/PhotoItem';
 
 type Props = {
 	photoData: PhotoData;
@@ -13,10 +14,8 @@ const PhotoPage: NextPage<Props> = ({ photoData }) => {
 	const convertedDate = formatDate(photoData.createdAt);
 
 	return (
-		<div>
-			<h1>{photoData.title}</h1>
-			<img src={photoData.image} alt='' />
-			<h1>{convertedDate}</h1>
+		<div className='h-screen w-100 bg-[#121316] text-white text-lg flex items-center justify-center'>
+			<PhotoItem title={photoData.title} createdAt={convertedDate} image={photoData.image} />
 		</div>
 	);
 };
@@ -24,7 +23,6 @@ const PhotoPage: NextPage<Props> = ({ photoData }) => {
 export default PhotoPage;
 
 export const getServerSideProps: GetServerSideProps = async context => {
-	// TODO: BETTER ERROR HANDLING
 
 	const photoId = context.query.photoId as string;
 
