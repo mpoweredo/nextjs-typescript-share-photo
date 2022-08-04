@@ -2,8 +2,15 @@ import React, { useCallback, useRef, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { db, storage } from '../data/firebaseConfig';
-import { addDoc, collection, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import {
+	addDoc,
+	collection,
+	doc,
+	serverTimestamp,
+	snapshotEqual,
+	updateDoc,
+} from 'firebase/firestore';
+import { getDownloadURL, ref, uploadBytes, uploadBytesResumable } from 'firebase/storage';
 import { FileWithPath } from 'react-dropzone';
 import Link from 'next/link';
 
@@ -12,6 +19,9 @@ const DropArea = () => {
 	const titleRef = useRef<HTMLInputElement>(null);
 	const [isUploading, setIsUploading] = useState<boolean>(false);
 	const [photoId, setPhotoID] = useState<string>();
+	const [progress, setProgress] = useState<number>(0);
+
+	console.log(progress);
 
 	const onDrop = useCallback((acceptedFile: File[]) => {
 		setSelectedFile(acceptedFile[0]);
@@ -42,16 +52,35 @@ const DropArea = () => {
 
 			const imgRef = await ref(storage, `photos/${uploadPhoto.id}/${selectedFile!.path}`);
 
-			await uploadBytes(imgRef, selectedFile!, 'data_url').then(async () => {
-				const downloadURL = await getDownloadURL(imgRef);
-				await updateDoc(doc(db, 'photos', uploadPhoto.id), {
-					image: downloadURL,
-				});
-			});
+			// const uploadingPhoto = await uploadBytes(imgRef, selectedFile!, 'data_url').then(async () => {
+			// 	const downloadURL = await getDownloadURL(imgRef);
+			// 	await updateDoc(doc(db, 'photos', uploadPhoto.id), {
+			// 		image: downloadURL,
+			// 	});
+			// });
 
-			setPhotoID(uploadPhoto.id);
-			setSelectedFile(undefined);
-			setIsUploading(false);
+			const uploadTask = uploadBytesResumable(imgRef, selectedFile!, 'data_url');
+
+			uploadTask.on(
+				'state_changed',
+				snapshot => {
+					setProgress(Math.floor((snapshot.bytesTransferred / snapshot.totalBytes) * 100));
+				},
+				error => {
+					console.log('something went wrong...');
+				},
+				async () => {
+					const downloadURL = await getDownloadURL(imgRef);
+					await updateDoc(doc(db, 'photos', uploadPhoto.id), {
+						image: downloadURL,
+					});
+
+					setPhotoID(uploadPhoto.id);
+					setSelectedFile(undefined);
+					setIsUploading(false);
+					setProgress(0)
+				}
+			);
 		} catch (error) {
 			setIsUploading(false);
 		}
@@ -85,13 +114,12 @@ const DropArea = () => {
 							Supported files (jpeg, png, jpg, webp)
 						</p>
 
-						{console.log(fileRejections)}
+						{!!fileRejections.length &&
+							fileRejections[0].errors[0].code === 'file-invalid-type' && (
+								<p className='text-red-400 text-lg'>File type not supported</p>
+							)}
 
-						{(!!fileRejections.length && fileRejections[0].errors[0].code === 'file-invalid-type') && (
-							<p className='text-red-400 text-lg'>File type not supported</p>
-						)}
-
-						{(!!fileRejections.length && fileRejections[0].errors[0]?.code === 'too-many-files') && (
+						{!!fileRejections.length && fileRejections[0].errors[0]?.code === 'too-many-files' && (
 							<p className='text-red-400 text-lg'>Too many files! Only one is allowed</p>
 						)}
 
@@ -104,6 +132,10 @@ const DropArea = () => {
 						) : (
 							<CloudUploadIcon sx={{ fontSize: 90 }} className='mt-3' />
 						)}
+
+						{progress !== 0 && <div className='h-2 w-64 rounded-full bg-slate-600 overflow-hidden mt-3'>
+							<div className={`bg-sky-400 h-full`} style={{width: `${progress}%`}} ></div>
+						</div>}
 					</div>
 				</div>
 				<button
