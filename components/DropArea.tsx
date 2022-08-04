@@ -11,7 +11,7 @@ const DropArea = () => {
 	const [selectedFile, setSelectedFile] = useState<FileWithPath>();
 	const titleRef = useRef<HTMLInputElement>(null);
 	const [isUploading, setIsUploading] = useState<boolean>(false);
-	const [photoId, setPhotoID] = useState<string>(null);
+	const [photoId, setPhotoID] = useState<string>();
 
 	const onDrop = useCallback((acceptedFile: File[]) => {
 		setSelectedFile(acceptedFile[0]);
@@ -58,8 +58,8 @@ const DropArea = () => {
 	};
 
 	return (
-		<>
-			<form onSubmit={submitHandler} className='w-[500px] h-[450px] flex flex-col items-center'>
+		<div className='flex flex-col px-2'>
+			<form onSubmit={submitHandler} className='sm:w-[500px] h-[450px] flex flex-col items-center'>
 				<input
 					ref={titleRef}
 					type='text'
@@ -80,30 +80,26 @@ const DropArea = () => {
 						) : (
 							<p>Drop image here, or click to select</p>
 						)}
-						<p className='text-gray-400 font-medium text-base'>Supported files (jpeg, png, jpg)</p>
+
+						<p className='text-gray-400 font-medium text-base'>
+							Supported files (jpeg, png, jpg, webp)
+						</p>
+
 						{!!fileRejections.length && (
 							<p className='text-red-400 text-lg'>File type not supported!</p>
 						)}
+
 						{selectedFile ? (
 							<img
-								className='w-[120px] mt-3 border-solid border-[2px] border-slate-500 p-3 rounded-lg'
+								className='w-[120px] mt-3 border-solid border-[2px] border-slate-500 p-2 rounded-md'
 								src={URL.createObjectURL(selectedFile)}
 								alt=''
 							/>
 						) : (
 							<CloudUploadIcon sx={{ fontSize: 90 }} className='mt-3' />
 						)}
-						{
-							// TODO: BETTER UI/UX
-							// TODO: ERROR HANDLING
-						}
 					</div>
 				</div>
-						{photoId && (
-							<button>
-								<Link href={`/${photoId}`}>Your link</Link>
-							</button>
-						)}
 				<button
 					disabled={isUploading}
 					className={`mt-5 bg-gray-800 w-full h-[75px] font-semibold rounded-sm hover:bg-gray-700 ${
@@ -112,7 +108,16 @@ const DropArea = () => {
 					Upload
 				</button>
 			</form>
-		</>
+			{photoId && (
+				<Link href={`/${photoId}`}>
+					<button
+						className='mt-5 bg-emerald-500 w-full h-[50px] font-semibold rounded-sm hover:bg-emerald-600 
+						 text-slate-900'>
+						Your link
+					</button>
+				</Link>
+			)}
+		</div>
 	);
 };
 
