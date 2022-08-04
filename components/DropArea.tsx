@@ -85,8 +85,14 @@ const DropArea = () => {
 							Supported files (jpeg, png, jpg, webp)
 						</p>
 
-						{!!fileRejections.length && (
-							<p className='text-red-400 text-lg'>File type not supported!</p>
+						{console.log(fileRejections)}
+
+						{(!!fileRejections.length && fileRejections[0].errors[0].code === 'file-invalid-type') && (
+							<p className='text-red-400 text-lg'>File type not supported</p>
+						)}
+
+						{(!!fileRejections.length && fileRejections[0].errors[0]?.code === 'too-many-files') && (
+							<p className='text-red-400 text-lg'>Too many files! Only one is allowed</p>
 						)}
 
 						{selectedFile ? (
