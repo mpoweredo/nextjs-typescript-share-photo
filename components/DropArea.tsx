@@ -21,8 +21,6 @@ const DropArea = () => {
 	const [photoId, setPhotoID] = useState<string>();
 	const [progress, setProgress] = useState<number>(0);
 
-	console.log(progress);
-
 	const onDrop = useCallback((acceptedFile: File[]) => {
 		setSelectedFile(acceptedFile[0]);
 	}, []);
@@ -52,14 +50,7 @@ const DropArea = () => {
 
 			const imgRef = await ref(storage, `photos/${uploadPhoto.id}/${selectedFile!.path}`);
 
-			// const uploadingPhoto = await uploadBytes(imgRef, selectedFile!, 'data_url').then(async () => {
-			// 	const downloadURL = await getDownloadURL(imgRef);
-			// 	await updateDoc(doc(db, 'photos', uploadPhoto.id), {
-			// 		image: downloadURL,
-			// 	});
-			// });
-
-			const uploadTask = uploadBytesResumable(imgRef, selectedFile!, 'data_url');
+			const uploadTask = uploadBytesResumable(imgRef, selectedFile!)
 
 			uploadTask.on(
 				'state_changed',
